@@ -1,2 +1,1 @@
-# 开发环境依赖
 -r requirements.txt
