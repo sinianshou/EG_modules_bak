@@ -25,16 +25,23 @@ def init_logger_module(app):
     app.logger.setLevel(log_level)
     
     # 配置文件处理器
-    handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024, backupCount=5)
-    handler.setLevel(log_level)
-    handler.setFormatter(formatter)
+    file_handler = RotatingFileHandler(
+        filename=log_file,
+        maxBytes=10 * 1024 * 1024,
+        backupCount=5,
+        encoding='utf-8'
+    )
+    file_handler.setLevel(log_level)  # 设置文件处理器的日志级别
+    file_handler.setFormatter(formatter)
     
-    # 配置控制台处理器
-    streamHandler = logging.StreamHandler()
-    streamHandler.setLevel(log_level)
-    streamHandler.setFormatter(formatter)
+    # 清理现有处理器
+    app.logger.handlers = [file_handler]
     
-    # 清理现有处理器并添加新处理器
-    app.logger.handlers = [handler, streamHandler]
+    # 仅在开发环境添加控制台处理器
+    if os.getenv('FLASK_ENV', 'production') == 'development':
+        stream_handler = logging.StreamHandler()
+        stream_handler.setLevel(log_level)
+        stream_handler.setFormatter(formatter)
+        app.logger.handlers.append(stream_handler)
     
     app.logger.info(f"Logger module initialized with level: {logging.getLevelName(log_level)}")
